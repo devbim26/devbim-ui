@@ -1,0 +1,81 @@
+/* Замена текста "Open WebUI" на "DevBIM" в сайдбаре */
+#sidebar .sidebar a.flex.flex-1.px-1\.5 > div.font-primary {
+  visibility: hidden;
+  position: relative;
+}
+
+#sidebar .sidebar a.flex.flex-1.px-1\.5 > div.font-primary::after {
+  content: "DevBIM";
+  visibility: visible;
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 600;
+  color: inherit;
+}
+
+/* Для темной темы */
+.dark #sidebar .sidebar a.flex.flex-1.px-1\.5 > div.font-primary::after {
+  color: #e5e7eb;
+}
+
+/* Для светлой темы */
+.light #sidebar .sidebar a.flex.flex-1.px-1\.5 > div.font-primary::after {
+  color: #111827;
+}
+
+
+/* Дополнительные стили для других мест, где может отображаться бренд */
+.brand-text::after {
+  content: "DevBIM";
+}
+
+/* Скрыть оригинальный текст бренда */
+.brand-text {
+  visibility: hidden;
+  position: relative;
+}
+
+.brand-text::after {
+  visibility: visible;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* Замена текста "Made by Open WebUI Community" в рабочем пространстве */
+.text-xl.font-medium.mb-1.line-clamp-1:contains('Made by Open WebUI Community') {
+  visibility: hidden;
+  position: relative;
+}
+
+.text-xl.font-medium.mb-1.line-clamp-1:contains('Made by Open WebUI Community')::after {
+  content: "Made by DevBIM Community";
+  visibility: visible;
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+/* Альтернативный селектор для текста в рабочем пространстве */
+div.text-xl.font-medium.mb-1.line-clamp-1 {
+  visibility: hidden;
+  position: relative;
+}
+
+div.text-xl.font-medium.mb-1.line-clamp-1::after {
+  content: "Made by DevBIM Community";
+  visibility: visible;
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
+/* NOTE: Глобальные CSS-блокировки попапов удалены, чтобы не ломать верстку.
+   Блокировка и замена текста выполняются точечно в static/loader.js */
