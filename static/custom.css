@@ -50,7 +50,7 @@
 }
 
 .text-xl.font-medium.mb-1.line-clamp-1:contains('Made by Open WebUI Community')::after {
-  content: "Made by DevBIM Community";
+  content: "Made by DevBIM";
   visibility: visible;
   position: absolute;
   left: 0;
@@ -67,7 +67,7 @@ div.text-xl.font-medium.mb-1.line-clamp-1 {
 }
 
 div.text-xl.font-medium.mb-1.line-clamp-1::after {
-  content: "Made by DevBIM Community";
+  content: "Made by DevBIM";
   visibility: visible;
   position: absolute;
   left: 0;
