@@ -41,7 +41,7 @@ For more information, be sure to check out our [Open WebUI Documentation](https:
 
 - 🎤📹 **Hands-Free Voice/Video Call**: Experience seamless communication with integrated hands-free voice and video call features, allowing for a more dynamic and interactive chat environment.
 
-- 🛠️ **Model Builder**: Easily create Ollama models via the Web UI. Create and add custom characters/agents, customize chat elements, and import models effortlessly through [Open WebUI Community](https://openwebui.com/) integration.
+- 🛠️ **Model Builder**: Easily create Ollama models via the Web UI. Create and add custom characters/agents, customize chat elements, and import models effortlessly through [DevBIM Community](https://devbim.com/) integration.
 
 - 🐍 **Native Python Function Calling Tool**: Enhance your LLMs with built-in code editor support in the tools workspace. Bring Your Own Function (BYOF) by simply adding your pure Python functions, enabling seamless integration with LLMs.
 
@@ -267,4 +267,4 @@ If you have any questions, suggestions, or need assistance, please open an issue
 
 ---
 
-Created by [Timothy Jaeryang Baek](https://github.com/tjbck) - Let's make Open WebUI even more amazing together! 💪
+Created by [Gvozdev Victor](https://devbim.com) - Let's make DevBIM even more amazing together! 💪

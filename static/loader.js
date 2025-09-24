@@ -79,4 +79,56 @@
   } else {
     patchDomBrand();
   }
+// --- DevBIM: remove Open WebUI license/Twemoji blocks from "About" tab (loader.js) ---
+function removeLicenseBlocks() {
+  try {
+    const about = document.getElementById('tab-about') || document.querySelector('#tab-about');
+    if (!about) return;
+
+    const candidates = about.querySelectorAll('div, p, span, a, li');
+    candidates.forEach((node) => {
+      const t = (node.textContent || '').toLowerCase();
+
+      if (
+        t.includes('emoji graphics provided by') ||
+        t.includes('twemoji') ||
+        t.includes('copyright (c) 2025 open webui') ||
+        t.includes('redistribution and use in source and binary forms') ||
+        t.includes('this software is provided by the copyright holders')
+      ) {
+        // поднимаемся немного вверх, чтобы удалить целый блок
+        let target = node;
+        for (let i = 0; i < 3 && target && target.parentElement; i++) {
+          if (target.classList?.contains('text-xs') || target.tagName === 'DIV') break;
+          target = target.parentElement;
+        }
+        try { target && target.remove(); } catch {}
+      }
+    });
+  } catch (e) {
+    console.debug('DevBIM license-block cleanup (loader.js) skip:', e);
+  }
+}
+
+// Выполнить сразу и несколько раз в первые секунды (как и бренд-патч)
+removeLicenseBlocks();
+(function burstLicenseClean() {
+  let t = 0;
+  const id = setInterval(() => {
+    removeLicenseBlocks();
+    if ((t += 1) > 20) clearInterval(id); // ~5 секунд при 250мс
+  }, 250);
+})();
+
+// Дополнительно: наблюдаем за изменениями DOM и стираем блоки лицензии динамически
+const devbimObserver = new MutationObserver(function(mutations) {
+  // быстрый вызов — дешёвая операция по сравнению с селекторами
+  removeLicenseBlocks();
+});
+try {
+  devbimObserver.observe(document.documentElement || document.body, {
+    childList: true,
+    subtree: true
+  });
+} catch {}
 })();
