@@ -11,23 +11,24 @@
   left: 0;
   top: 0;
   font-weight: 600;
-  color: inherit;
+  color: #0066cc; /* DevBIM blue color */
 }
 
 /* Для темной темы */
 .dark #sidebar .sidebar a.flex.flex-1.px-1\.5 > div.font-primary::after {
-  color: #e5e7eb;
+  color: #4da6ff; /* Lighter blue for dark theme */
 }
 
 /* Для светлой темы */
 .light #sidebar .sidebar a.flex.flex-1.px-1\.5 > div.font-primary::after {
-  color: #111827;
+  color: #0066cc; /* DevBIM blue for light theme */
 }
 
 
 /* Дополнительные стили для других мест, где может отображаться бренд */
 .brand-text::after {
   content: "DevBIM";
+  color: #0066cc; /* DevBIM blue color */
 }
 
 /* Скрыть оригинальный текст бренда */
@@ -41,6 +42,7 @@
   position: absolute;
   left: 0;
   top: 0;
+  color: #0066cc; /* DevBIM blue color */
 }
 
 /* Замена текста "Made by Open WebUI Community" в рабочем пространстве */

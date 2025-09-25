@@ -18,6 +18,8 @@
         if (el && !el.dataset?.devbimApplied) {
           el.textContent = BRAND_NAME;
           el.dataset.devbimApplied = 'true';
+          // Apply DevBIM blue color to the emblem
+          el.style.color = '#0066cc';
         }
       });
 
