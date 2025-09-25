@@ -13,6 +13,7 @@
 	import Audio from './Settings/Audio.svelte';
 	import DataControls from './Settings/DataControls.svelte';
 	import Personalization from './Settings/Personalization.svelte';
+	import About from './Settings/About.svelte';
 	import Search from '../icons/Search.svelte';
 	import XMark from '../icons/XMark.svelte';
 	import Connections from './Settings/Connections.svelte';
@@ -26,6 +27,7 @@
 	import Face from '../icons/Face.svelte';
 	import AppNotification from '../icons/AppNotification.svelte';
 	import UserBadgeCheck from '../icons/UserBadgeCheck.svelte';
+	import InfoCircle from '../icons/InfoCircle.svelte';
 
 	const i18n = getContext('i18n');
 
@@ -415,6 +417,23 @@
 				'webhook url',
 				'webhookurl'
 			]
+		},
+		{
+			id: 'about',
+			title: 'About',
+			keywords: [
+				'about',
+				'info',
+				'information',
+				'о программе',
+				'информация',
+				'version',
+				'версия',
+				'license',
+				'лицензия',
+				'documentation',
+				'документация'
+			]
 		}
 	];
 
@@ -755,6 +774,30 @@
 								</div>
 								<div class=" self-center">{$i18n.t('Account')}</div>
 							</button>
+						{:else if tabId === 'about'}
+							<button
+								role="tab"
+								aria-controls="tab-about"
+								aria-selected={selectedTab === 'about'}
+								class={`px-0.5 py-1 min-w-fit rounded-lg flex-1 md:flex-none flex text-left transition
+								${
+									selectedTab === 'about'
+										? ($settings?.highContrastMode ?? false)
+											? 'dark:bg-gray-800 bg-gray-200'
+											: ''
+										: ($settings?.highContrastMode ?? false)
+											? 'hover:bg-gray-200 dark:hover:bg-gray-800'
+											: 'text-gray-300 dark:text-gray-600 hover:text-gray-700 dark:hover:text-white'
+								}`}
+								on:click={() => {
+									selectedTab = 'about';
+								}}
+							>
+								<div class=" self-center mr-2">
+									<InfoCircle strokeWidth="2" />
+								</div>
+								<div class=" self-center">{$i18n.t('About')}</div>
+							</button>
 						{/if}
 					{/each}
 				{:else}
@@ -834,6 +877,8 @@
 							toast.success($i18n.t('Settings saved successfully!'));
 						}}
 					/>
+				{:else if selectedTab === 'about'}
+					<About />
 				{/if}
 			</div>
 		</div>

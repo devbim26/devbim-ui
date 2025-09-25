@@ -21,6 +21,7 @@
 	import Code from '$lib/components/icons/Code.svelte';
 	import UserGroup from '$lib/components/icons/UserGroup.svelte';
 	import SignOut from '$lib/components/icons/SignOut.svelte';
+	import InfoCircle from '$lib/components/icons/InfoCircle.svelte';
 
 	const i18n = getContext('i18n');
 
@@ -28,6 +29,7 @@
 	export let role = '';
 	export let help = false;
 	export let className = 'max-w-[240px]';
+	export let aboutButtonDisabled = false; // Новый параметр для блокировки кнопки
 
 	const dispatch = createEventDispatcher();
 
@@ -160,7 +162,7 @@
 						on:click={() => {
 							show = false;
 						}}
-						href="https://docs.openwebui.com"
+						href="https://docs.DevBIM.com"
 					>
 						<QuestionMarkCircle className="size-5" />
 						<div class="flex items-center">{$i18n.t('Documentation')}</div>
@@ -175,7 +177,7 @@
 						on:click={() => {
 							show = false;
 						}}
-						href="https://github.com/open-webui/open-webui/releases"
+						href="https://github.com/DevBIM"
 					>
 						<Map className="size-5" />
 						<div class="flex items-center">{$i18n.t('Releases')}</div>
@@ -198,7 +200,63 @@
 					<Keyboard className="size-5" />
 					<div class="flex items-center">{$i18n.t('Keyboard shortcuts')}</div>
 				</DropdownMenu.Item>
+
+				<!-- About Button -->
+				<DropdownMenu.Item
+					class="flex gap-2 items-center py-1.5 px-3 text-sm select-none w-full rounded-xl transition {aboutButtonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer'}"
+					id="about-button"
+					disabled={aboutButtonDisabled}
+					on:click={async () => {
+						if (aboutButtonDisabled) return; // Блокируем действие если кнопка отключена
+						
+						show = false;
+						showSettings.set(true);
+						// Устанавливаем вкладку "About" как активную
+						setTimeout(() => {
+							const aboutTab = document.querySelector('[aria-controls="tab-about"]');
+							if (aboutTab && aboutTab instanceof HTMLElement) {
+								aboutTab.click();
+							}
+						}, 100);
+
+						if ($mobile) {
+							await tick();
+							showSidebar.set(false);
+						}
+					}}
+				>
+					<InfoCircle className="size-5 {aboutButtonDisabled ? 'opacity-50' : ''}" />
+					<div class="flex items-center {aboutButtonDisabled ? 'opacity-50' : ''}">{$i18n.t('About')}</div>
+				</DropdownMenu.Item>
 			{/if}
+
+			<!-- About Button в основном меню -->
+			<DropdownMenu.Item
+				class="flex gap-2 items-center py-1.5 px-3 text-sm select-none w-full rounded-xl transition {aboutButtonDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer'}"
+				id="about-button-main"
+				disabled={aboutButtonDisabled}
+				on:click={async () => {
+					if (aboutButtonDisabled) return; // Блокируем действие если кнопка отключена
+					
+					show = false;
+					showSettings.set(true);
+					// Устанавливаем вкладку "About" как активную
+					setTimeout(() => {
+						const aboutTab = document.querySelector('[aria-controls="tab-about"]');
+						if (aboutTab && aboutTab instanceof HTMLElement) {
+							aboutTab.click();
+						}
+					}, 100);
+
+					if ($mobile) {
+						await tick();
+						showSidebar.set(false);
+					}
+				}}
+			>
+				<InfoCircle className="size-5 {aboutButtonDisabled ? 'opacity-50' : ''}" />
+				<div class="flex items-center {aboutButtonDisabled ? 'opacity-50' : ''}">{$i18n.t('About')}</div>
+			</DropdownMenu.Item>
 
 			<hr class=" border-gray-50 dark:border-gray-800 my-1 p-0" />
 
