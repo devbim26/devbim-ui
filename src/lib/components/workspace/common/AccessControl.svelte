@@ -1,17 +1,16 @@
 <script lang="ts">
 	import { getContext, onMount } from 'svelte';
 
-	const i18n = getContext('i18n');
+	const i18n = getContext<any>('i18n');
 
 	import { getGroups } from '$lib/apis/groups';
 	import { getAllUsers } from '$lib/apis/users';
-	import Tooltip from '$lib/components/common/Tooltip.svelte';
 	import Plus from '$lib/components/icons/Plus.svelte';
 	import UserCircleSolid from '$lib/components/icons/UserCircleSolid.svelte';
 	import XMark from '$lib/components/icons/XMark.svelte';
 	import Badge from '$lib/components/common/Badge.svelte';
 
-	export let onChange: Function = () => {};
+	export let onChange: (value: any) => void = () => {};
 
 	export let accessRoles = ['read'];
 	export let accessControl: any = {};
@@ -22,43 +21,61 @@
 	let selectedUserId = '';
 	let groups: any[] = [];
 	let users: any[] = [];
+	let accessGroups: any[] = [];
+	let accessUsers: any[] = [];
 
-	// Функция для определения типа доступа
+	const toIdArray = (collection?: string[]): string[] => collection ?? [];
+
+	const containsId = (collection: string[] | undefined, id: string): boolean =>
+		toIdArray(collection).includes(id);
+
+	const addId = (collection: string[] | undefined, id: string): string[] =>
+		containsId(collection, id) ? toIdArray(collection) : [...toIdArray(collection), id];
+
+	const removeId = (collection: string[] | undefined, id: string): string[] =>
+		toIdArray(collection).filter((item) => item !== id);
+
+	const createEmptyAccess = () => ({
+		read: {
+			group_ids: [] as string[],
+			user_ids: [] as string[]
+		},
+		write: {
+			group_ids: [] as string[],
+			user_ids: [] as string[]
+		}
+	});
+
 	const getAccessType = () => {
 		if (accessControl === null) return 'public';
-		if (accessControl && (accessControl.read?.group_ids?.length > 0 || accessControl.read?.user_ids?.length > 0 || accessControl.write?.group_ids?.length > 0 || accessControl.write?.user_ids?.length > 0)) {
+		if (
+			toIdArray(accessControl?.read?.group_ids).length > 0 ||
+			toIdArray(accessControl?.read?.user_ids).length > 0 ||
+			toIdArray(accessControl?.write?.group_ids).length > 0 ||
+			toIdArray(accessControl?.write?.user_ids).length > 0
+		) {
 			return 'groups';
 		}
 		return 'private';
 	};
 
-	// Функция для обработки изменения типа доступа
 	const handleAccessTypeChange = (value: string) => {
 		if (value === 'public') {
 			accessControl = null;
 		} else if (value === 'groups') {
+			const current = accessControl ?? createEmptyAccess();
 			accessControl = {
 				read: {
-					group_ids: accessControl?.read?.group_ids ?? [],
-					user_ids: accessControl?.read?.user_ids ?? []
+					group_ids: toIdArray(current?.read?.group_ids),
+					user_ids: toIdArray(current?.read?.user_ids)
 				},
 				write: {
-					group_ids: accessControl?.write?.group_ids ?? [],
-					user_ids: accessControl?.write?.user_ids ?? []
+					group_ids: toIdArray(current?.write?.group_ids),
+					user_ids: toIdArray(current?.write?.user_ids)
 				}
 			};
 		} else {
-			// private
-			accessControl = {
-				read: {
-					group_ids: [],
-					user_ids: []
-				},
-				write: {
-					group_ids: [],
-					user_ids: []
-				}
-			};
+			accessControl = createEmptyAccess();
 		}
 		onChange(accessControl);
 	};
@@ -69,16 +86,7 @@
 
 	const initPublicAccess = () => {
 		if (!allowPublic && accessControl === null) {
-			accessControl = {
-				read: {
-					group_ids: [],
-					user_ids: []
-				},
-				write: {
-					group_ids: [],
-					user_ids: []
-				}
-			};
+			accessControl = createEmptyAccess();
 			onChange(accessControl);
 		}
 	};
@@ -92,25 +100,33 @@
 		} else {
 			accessControl = {
 				read: {
-					group_ids: accessControl?.read?.group_ids ?? [],
-					user_ids: accessControl?.read?.user_ids ?? []
+					group_ids: toIdArray(accessControl?.read?.group_ids),
+					user_ids: toIdArray(accessControl?.read?.user_ids)
 				},
 				write: {
-					group_ids: accessControl?.write?.group_ids ?? [],
-					user_ids: accessControl?.write?.user_ids ?? []
+					group_ids: toIdArray(accessControl?.write?.group_ids),
+					user_ids: toIdArray(accessControl?.write?.user_ids)
 				}
 			};
 		}
 	});
+
+	$: accessGroups = groups.filter((group) =>
+		toIdArray(accessControl?.read?.group_ids).includes(group.id)
+	);
+
+	$: accessUsers = users.filter((user) =>
+		toIdArray(accessControl?.read?.user_ids).includes(user.id)
+	);
 </script>
 
-<div class=" rounded-lg flex flex-col gap-2">
-	<div class="">
-		<div class=" text-sm font-semibold mb-1">{$i18n.t('Visibility')}</div>
+<div class="rounded-lg flex flex-col gap-2">
+	<div>
+		<div class="text-sm font-semibold mb-1">{$i18n.t('Visibility')}</div>
 
 		<div class="flex gap-2.5 items-center mb-1">
 			<div>
-				<div class=" p-2 bg-black/5 dark:bg-white/5 rounded-full">
+				<div class="p-2 bg-black/5 dark:bg-white/5 rounded-full">
 					{#if accessControl !== null}
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -146,7 +162,6 @@
 			</div>
 
 			<div>
-				<!-- Улучшенный интерфейс выбора типа доступа -->
 				<div class="flex flex-col gap-2">
 					<label class="flex items-center gap-2 cursor-pointer">
 						<input
@@ -162,7 +177,7 @@
 							<span class="text-xs text-gray-500">{$i18n.t('Accessible to all users')}</span>
 						</div>
 					</label>
-					
+
 					<label class="flex items-center gap-2 cursor-pointer">
 						<input
 							type="radio"
@@ -177,7 +192,7 @@
 							<span class="text-xs text-gray-500">{$i18n.t('Only the owner can access')}</span>
 						</div>
 					</label>
-					
+
 					<label class="flex items-center gap-2 cursor-pointer">
 						<input
 							type="radio"
@@ -188,19 +203,20 @@
 							class="w-4 h-4 text-blue-600"
 						/>
 						<div class="flex flex-col">
-							<span class="text-sm font-medium">{$i18n.t('Specific Groups and Users')}</span>
-							<span class="text-xs text-gray-500">{$i18n.t('Accessible to selected groups and users')}</span>
+							<span class="text-sm font-medium">
+								{$i18n.t('Specific Groups and Users')}
+							</span>
+							<span class="text-xs text-gray-500">
+								{$i18n.t('Accessible to selected groups and users')}
+							</span>
 						</div>
 					</label>
 				</div>
-
 			</div>
 		</div>
 	</div>
+
 	{#if accessControl !== null}
-		{@const accessGroups = groups.filter((group) =>
-			(accessControl?.read?.group_ids ?? []).includes(group.id)
-		)}
 		<div>
 			<div class="">
 				<div class="flex justify-between mb-1.5">
@@ -217,10 +233,10 @@
 								bind:value={selectedGroupId}
 								on:change={() => {
 									if (selectedGroupId !== '') {
-										accessControl.read.group_ids = [
-											...(accessControl?.read?.group_ids ?? []),
+										accessControl.read.group_ids = addId(
+											accessControl?.read?.group_ids,
 											selectedGroupId
-										];
+										);
 
 										selectedGroupId = '';
 										onChange(accessControl);
@@ -230,7 +246,9 @@
 								<option class="text-gray-700" value="" disabled selected>
 									{$i18n.t('Select a group')}
 								</option>
-								{#each groups.filter((group) => !(accessControl?.read?.group_ids ?? []).includes(group.id)) as group}
+								{#each groups.filter(
+									(group) => !toIdArray(accessControl?.read?.group_ids).includes(group.id)
+								) as group}
 									<option class="text-gray-700" value={group.id}>{group.name}</option>
 								{/each}
 							</select>
@@ -240,10 +258,10 @@
 							type="button"
 							on:click={() => {
 								if (selectedGroupId !== '') {
-									accessControl.read.group_ids = [
-										...(accessControl?.read?.group_ids ?? []),
+									accessControl.read.group_ids = addId(
+										accessControl?.read?.group_ids,
 										selectedGroupId
-									];
+									);
 									selectedGroupId = '';
 									onChange(accessControl);
 								}
@@ -262,44 +280,47 @@
 									<UserCircleSolid className="size-4 text-gray-500" />
 									<span class="text-sm font-medium">{group.name}</span>
 								</div>
-								
+
 								<div class="flex items-center gap-2">
 									{#if accessRoles.includes('write')}
 										<button
 											class="px-2 py-1 text-xs rounded"
 											type="button"
 											on:click={() => {
-												if ((accessControl?.write?.group_ids ?? []).includes(group.id)) {
-													accessControl.write.group_ids = (
-														accessControl?.write?.group_ids ?? []
-													).filter((group_id) => group_id !== group.id);
-												} else {
-													accessControl.write.group_ids = [
-														...(accessControl?.write?.group_ids ?? []),
+												if (containsId(accessControl?.write?.group_ids, group.id)) {
+													accessControl.write.group_ids = removeId(
+														accessControl?.write?.group_ids,
 														group.id
-													];
+													);
+												} else {
+													accessControl.write.group_ids = addId(
+														accessControl?.write?.group_ids,
+														group.id
+													);
 												}
 												onChange(accessControl);
 											}}
 										>
-											{#if (accessControl?.write?.group_ids ?? []).includes(group.id)}
-												<Badge type={'success'} content={$i18n.t('Write')} />
+											{#if containsId(accessControl?.write?.group_ids, group.id)}
+											<Badge type={'success'} content={$i18n.t('Write')} />
 											{:else}
-												<Badge type={'info'} content={$i18n.t('Read')} />
+											<Badge type={'info'} content={$i18n.t('Read')} />
 											{/if}
 										</button>
 									{/if}
-									
+
 									<button
 										class="p-1 text-gray-500 hover:text-red-500 transition"
 										type="button"
 										on:click={() => {
-											accessControl.read.group_ids = (accessControl?.read?.group_ids ?? []).filter(
-												(id) => id !== group.id
+											accessControl.read.group_ids = removeId(
+												accessControl?.read?.group_ids,
+												group.id
 											);
-											accessControl.write.group_ids = (
-												accessControl?.write?.group_ids ?? []
-											).filter((id) => id !== group.id);
+											accessControl.write.group_ids = removeId(
+												accessControl?.write?.group_ids,
+												group.id
+											);
 											onChange(accessControl);
 										}}
 									>
@@ -317,7 +338,6 @@
 			</div>
 		</div>
 
-		<!-- Секция пользователей -->
 		<div>
 			<div class="">
 				<div class="flex justify-between mb-1.5">
@@ -334,10 +354,10 @@
 								bind:value={selectedUserId}
 								on:change={() => {
 									if (selectedUserId !== '') {
-										accessControl.read.user_ids = [
-											...(accessControl?.read?.user_ids ?? []),
+										accessControl.read.user_ids = addId(
+											accessControl?.read?.user_ids,
 											selectedUserId
-										];
+										);
 
 										selectedUserId = '';
 										onChange(accessControl);
@@ -347,8 +367,12 @@
 								<option class="text-gray-700" value="" disabled selected>
 									{$i18n.t('Select a user')}
 								</option>
-								{#each users.filter((user) => !(accessControl?.read?.user_ids ?? []).includes(user.id)) as user}
-									<option class="text-gray-700" value={user.id}>{user.name || user.email}</option>
+								{#each users.filter(
+									(user) => !toIdArray(accessControl?.read?.user_ids).includes(user.id)
+								) as user}
+									<option class="text-gray-700" value={user.id}>
+										{user.name || user.email}
+									</option>
 								{/each}
 							</select>
 						</div>
@@ -357,10 +381,10 @@
 							type="button"
 							on:click={() => {
 								if (selectedUserId !== '') {
-									accessControl.read.user_ids = [
-										...(accessControl?.read?.user_ids ?? []),
+									accessControl.read.user_ids = addId(
+										accessControl?.read?.user_ids,
 										selectedUserId
-									];
+									);
 									selectedUserId = '';
 									onChange(accessControl);
 								}
@@ -371,9 +395,6 @@
 					</div>
 				</div>
 
-				{@const accessUsers = users.filter((user) =>
-					(accessControl?.read?.user_ids ?? []).includes(user.id)
-				)}
 				{#if accessUsers.length > 0}
 					<div class="space-y-2">
 						{#each accessUsers as user}
@@ -389,20 +410,21 @@
 											class="px-2 py-1 text-xs rounded"
 											type="button"
 											on:click={() => {
-												if ((accessControl?.write?.user_ids ?? []).includes(user.id)) {
-													accessControl.write.user_ids = (
-														accessControl?.write?.user_ids ?? []
-													).filter((user_id) => user_id !== user.id);
-												} else {
-													accessControl.write.user_ids = [
-														...(accessControl?.write?.user_ids ?? []),
+												if (containsId(accessControl?.write?.user_ids, user.id)) {
+													accessControl.write.user_ids = removeId(
+														accessControl?.write?.user_ids,
 														user.id
-													];
+													);
+												} else {
+													accessControl.write.user_ids = addId(
+														accessControl?.write?.user_ids,
+														user.id
+													);
 												}
 												onChange(accessControl);
 											}}
 										>
-											{#if (accessControl?.write?.user_ids ?? []).includes(user.id)}
+											{#if containsId(accessControl?.write?.user_ids, user.id)}
 												<Badge type={'success'} content={$i18n.t('Write')} />
 											{:else}
 												<Badge type={'info'} content={$i18n.t('Read')} />
@@ -414,12 +436,14 @@
 										class="p-1 text-gray-500 hover:text-red-500 transition"
 										type="button"
 										on:click={() => {
-											accessControl.read.user_ids = (accessControl?.read?.user_ids ?? []).filter(
-												(id) => id !== user.id
+											accessControl.read.user_ids = removeId(
+												accessControl?.read?.user_ids,
+												user.id
 											);
-											accessControl.write.user_ids = (
-												accessControl?.write?.user_ids ?? []
-											).filter((id) => id !== user.id);
+											accessControl.write.user_ids = removeId(
+												accessControl?.write?.user_ids,
+												user.id
+											);
 											onChange(accessControl);
 										}}
 									>
